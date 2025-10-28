@@ -36,11 +36,38 @@ hr {{ border: 0; border-top: 1px solid rgba(255,255,255,.08); margin: 8px 0 16px
 </style>
 """, unsafe_allow_html=True)
 
-st.markdown(
-    f'<div class="section"><h1>💜 WhatsApp Chat Analyzer</h1>'
-    f'<p>Upload export (.txt). We automatically ignore &lt;Media omitted&gt; lines.</p></div>',
-    unsafe_allow_html=True
-)
+st.markdown("""
+<style>
+/* Full-width hero header */
+.hero-box {
+  width: 100% !important;
+  padding: 28px 38px;
+  background: linear-gradient(135deg, rgba(124,58,237,.35), rgba(124,58,237,.08));
+  border: 1px solid rgba(124,58,237,.45);
+  border-radius: 0px 0px 16px 16px;
+  box-shadow: 0 18px 50px rgba(124,58,237,.25);
+  margin: -2rem 0 1.5rem 0;  /* stretch into full view container */
+}
+
+.hero-title {
+  font-size: 36px;
+  font-weight: 800;
+  color: #EAEAF2 !important;
+  margin-bottom: 4px;
+}
+
+.hero-sub {
+  font-size: 17px;
+  opacity: .85;
+}
+</style>
+
+<div class="hero-box">
+  <div class="hero-title">💜 WhatsApp Chat Analyzer</div>
+  <div class="hero-sub">Upload your chat (.txt). Media lines are automatically ignored for accuracy.</div>
+</div>
+""", unsafe_allow_html=True)
+
 
 # ---------- SIDEBAR ----------
 with st.sidebar:
