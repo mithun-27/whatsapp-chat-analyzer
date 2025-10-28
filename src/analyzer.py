@@ -1,23 +1,32 @@
 from collections import Counter
 import pandas as pd
-import numpy as np
 from pathlib import Path
 from .utils import extract_urls, ensure_dir
 
+# Basic English stopwords + a few noisy tokens we never want
 STOPWORDS = set((
     "the","to","you","and","a","of","in","is","for","on","it","i","me","my","we","our","your","yours",
     "at","this","that","was","are","be","with","as","not","have","has","had","but","or","so","if","then",
-    "they","them","he","she","him","her","from","by","an","am","its","there","here"
+    "they","them","he","she","him","her","from","by","an","am","its","there","here",
+    # WhatsApp export artifacts
+    "media","omitted","pm","am"
 ))
 
+# extra tokens to exclude even if not in STOPWORDS
+EXCLUDE_TOKENS = {"media", "omitted"}
+
+def _clean_messages(df: pd.DataFrame) -> pd.Series:
+    """Return only real user text (no system, no media)."""
+    mask = (~df["is_system"].fillna(False)) & (~df["is_media"].fillna(False)) & (df["message"].notna())
+    return df.loc[mask, "message"]
+
 def basic_stats(df: pd.DataFrame) -> dict:
-    data = df.copy()
-    data = data[~data["is_system"].fillna(False)]
-    total_msgs = len(data)
-    participants = sorted([s for s in data["sender"].dropna().unique()])
-    media_msgs = int(data["is_media"].sum())
-    emojis = int(data["emoji_count"].sum())
-    links = sum(len(extract_urls(t)) for t in data["message"].dropna())
+    text_df = df[(~df["is_system"].fillna(False))]
+    total_msgs = len(text_df)
+    participants = sorted([s for s in text_df["sender"].dropna().unique()])
+    media_msgs = int(text_df["is_media"].sum())
+    emojis = int(text_df["emoji_count"].sum())
+    links = sum(len(extract_urls(t)) for t in text_df["message"].dropna())
     return {
         "total_messages": total_msgs,
         "participants": participants,
@@ -29,7 +38,7 @@ def basic_stats(df: pd.DataFrame) -> dict:
     }
 
 def messages_per_sender(df: pd.DataFrame) -> pd.DataFrame:
-    d = df[~df["is_system"] & df["sender"].notna()].groupby("sender")["message"] \
+    d = df[~df["is_system"].fillna(False) & df["sender"].notna()].groupby("sender")["message"] \
         .count().sort_values(ascending=False).reset_index(name="message_count")
     return d
 
@@ -51,27 +60,20 @@ def weekday_hour_heatmap(df: pd.DataFrame) -> pd.DataFrame:
     return mat
 
 def top_words(df: pd.DataFrame, top_n: int = 50) -> pd.DataFrame:
+    """Return most common words from real user text (no media/system)."""
     counter = Counter()
-
-    # Remove system messages and detected media messages entirely
-    text_df = df[(~df["is_system"]) & (~df["is_media"]) & (df["message"].notna())]
-
-    # Additional unwanted tokens
-    EXCLUDE = {"media", "omitted"}
-
-    for t in text_df["message"]:
+    for t in _clean_messages(df):
         for w in t.lower().split():
-            w = "".join(ch for ch in w if ch.isalnum())  # keep only alphanumeric
-            if not w or w.isdigit() or w in STOPWORDS or w in EXCLUDE:
+            w = "".join(ch for ch in w if ch.isalnum())  # strip punctuation
+            if not w or w.isdigit() or w in STOPWORDS or w in EXCLUDE_TOKENS:
                 continue
             counter[w] += 1
-
     items = counter.most_common(top_n)
-    return pd.DataFrame(items, columns=["word", "count"])
-
+    return pd.DataFrame(items, columns=["word","count"])
 
 def emoji_freq(df: pd.DataFrame, top_n: int = 30) -> pd.DataFrame:
-    counter = Counter()
+    from collections import Counter as CC
+    counter = CC()
     for s in df["emoji_list"].dropna():
         for e in list(s):
             counter[e] += 1

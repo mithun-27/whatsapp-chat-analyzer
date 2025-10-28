@@ -1,10 +1,12 @@
 from pathlib import Path
 import matplotlib.pyplot as plt
+import matplotlib
 import pandas as pd
 from wordcloud import WordCloud
+
 from .analyzer import (
     messages_per_sender, daily_timeline, hourly_timeline,
-    weekday_hour_heatmap, top_words, emoji_freq
+    weekday_hour_heatmap, top_words, emoji_freq, _clean_messages
 )
 from .utils import ensure_dir
 
@@ -12,7 +14,7 @@ PURPLE = "#7C3AED"
 FG     = "#EAEAF2"
 BG     = "#0B0B10"
 
-def _style():
+def _set_theme():
     plt.rcParams.update({
         "axes.facecolor": BG,
         "figure.facecolor": BG,
@@ -22,18 +24,37 @@ def _style():
         "ytick.color": FG,
         "text.color": FG,
         "axes.titleweight": "bold",
+        "grid.alpha": 0.25
     })
+
+def _set_emoji_font():
+    """Try to use an emoji-capable font so emoji labels render correctly."""
+    candidates = [
+        "Segoe UI Emoji",       # Windows
+        "Noto Color Emoji",     # Linux
+        "Apple Color Emoji",    # macOS
+        "Twemoji Mozilla",
+    ]
+    for fam in candidates:
+        try:
+            matplotlib.font_manager.findfont(fam, fallback_to_default=False)
+            plt.rcParams["font.family"] = fam
+            return fam
+        except Exception:
+            continue
+    return None
 
 def _save(path: Path, title: str):
     plt.title(title)
-    plt.grid(True, linestyle=":", alpha=0.3)
+    plt.grid(True, linestyle=":")
     plt.tight_layout()
     plt.savefig(path, dpi=160, facecolor=BG)
     plt.close()
 
 def plot_all(df: pd.DataFrame, outdir: Path):
     ensure_dir(outdir)
-    _style()
+    _set_theme()
+    _set_emoji_font()
 
     # 1) Messages per sender
     mps = messages_per_sender(df).head(15)
@@ -53,21 +74,41 @@ def plot_all(df: pd.DataFrame, outdir: Path):
     ha = hourly_timeline(df)
     plt.figure()
     plt.bar(ha["hour"], ha["messages"], color=PURPLE)
+    plt.xticks(range(0, 24, 1))
     _save(outdir / "chart_hourly_timeline.png", "Hourly Message Distribution")
 
     # 4) Weekday x Hour heatmap
     hm = weekday_hour_heatmap(df)
     plt.figure()
-    plt.imshow(hm.values, aspect="auto", cmap="magma")
+    im = plt.imshow(hm.values, aspect="auto", cmap="magma")
     plt.yticks(ticks=range(7), labels=hm.index.tolist())
-    plt.xticks(ticks=range(0,24,2), labels=list(range(0,24,2)))
+    plt.xticks(ticks=range(0,24,1), labels=list(range(0,24,1)))
+    plt.colorbar(im, label="Messages")
     _save(outdir / "chart_weekday_hour_heatmap.png", "Activity Heatmap (Weekday × Hour)")
 
-    # 5) WordCloud
+    # 5) WordCloud (built ONLY from clean messages; excludes <Media omitted>)
+    clean_msgs = _clean_messages(df)
+    # Build a weighted text using the same filtering as top_words (keeps results consistent)
     tw = top_words(df, 200)
-    wc = WordCloud(width=1200, height=600, background_color=BG, colormap="magma").generate(
-        " ".join([ (w+" ")*c for w,c in tw.values ])
-    )
+    wc_text = " ".join([(w + " ") * c for w, c in tw.values])
+
+    # Choose an emoji-capable font if available; otherwise default
+    font_path = None
+    for candidate in [
+        "C:/Windows/Fonts/seguiemj.ttf",                 # Segoe UI Emoji (Windows)
+        "/usr/share/fonts/truetype/noto/NotoColorEmoji.ttf",
+        "/System/Library/Fonts/Apple Color Emoji.ttc",
+    ]:
+        if Path(candidate).exists():
+            font_path = candidate
+            break
+
+    wc = WordCloud(
+        width=1400, height=700, background_color=BG,
+        colormap="magma", prefer_horizontal=0.9,
+        font_path=font_path
+    ).generate(wc_text if wc_text.strip() else "chat")
+
     plt.figure(figsize=(10,5))
     plt.imshow(wc, interpolation="bilinear")
     plt.axis("off")
