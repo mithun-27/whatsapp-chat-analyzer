@@ -37,64 +37,56 @@ hr {{ border: 0; border-top: 1px solid rgba(255,255,255,.08); margin: 8px 0 16px
 """, unsafe_allow_html=True)
 
 
-# --- Full-bleed hero header (fully visible, not clipped) ---
+# --- Clean Full Banner Header (Final Fix) ---
 st.markdown("""
 <style>
-/* Give the main content a consistent side gutter */
-.block-container{
-  padding-left:2rem !important;
-  padding-right:2rem !important;
+/* Remove container squeezing */
+.block-container {
+    padding-top: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
 }
 
-/* Full-bleed container that spans the entire viewport width without using negative top margins */
-.full-bleed {
-  position: relative;
-  left: 50%;
-  right: 50%;
-  margin-left: -50vw;
-  margin-right: -50vw;
-  width: 100vw;
+/* Full-screen width hero wrapper */
+.hero-section {
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+    margin-right: calc(50% - 50vw);
+    margin-top: 30px; /* <-- Moves banner DOWN (Fixes your issue) */
+    margin-bottom: 30px;
+    padding: 50px 60px; /* <-- Makes the banner taller and more premium */
+    background: linear-gradient(135deg, #7C3AED, #3B0A68);
+    border-radius: 14px;
+    box-shadow: 0 8px 35px rgba(124,58,237,0.5);
+    border: 1px solid rgba(255,255,255,0.08);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
-/* Add a little space from the very top so the banner is fully visible */
-.hero-wrap{
-  margin-top: 18px;          /* <-- move banner DOWN from the top */
-  margin-bottom: 18px;
+/* Title */
+.hero-title {
+    font-size: 42px;
+    font-weight: 900;
+    color: #FFFFFF;
+    margin-bottom: 8px;
 }
 
-/* The hero itself */
-.hero-box{
-  width: 100%;
-  padding: 28px 38px;
-  background:
-    radial-gradient(1200px 200px at 10% 0%, rgba(124,58,237,.45), rgba(124,58,237,0)),
-    linear-gradient(135deg, #2a114e, #141223);
-  border: 1px solid rgba(124,58,237,.45);
-  border-radius: 12px;       /* full rectangle with rounded corners fully visible */
-  box-shadow: 0 14px 42px rgba(124,58,237,.25);
-}
-
-.hero-title{
-  font-size: 40px;
-  line-height: 1.15;
-  font-weight: 800;
-  color: #EAEAF2 !important;
-  margin: 0 0 6px 0;
-}
-.hero-sub{
-  font-size: 16px;
-  opacity: .9;
-  margin: 0;
+/* Subtitle */
+.hero-sub {
+    font-size: 18px;
+    font-weight: 400;
+    opacity: 0.92;
+    color: #EDE9FF;
 }
 </style>
 
-<div class="full-bleed hero-wrap">
-  <div class="hero-box">
+<div class="hero-section">
     <div class="hero-title">💜 WhatsApp Chat Analyzer</div>
-    <div class="hero-sub">Upload your chat (.txt). Media lines are automatically ignored for accuracy.</div>
-  </div>
+    <div class="hero-sub">Upload your chat (.txt) — media lines are automatically removed for clean analysis.</div>
 </div>
 """, unsafe_allow_html=True)
+
 
 
 
