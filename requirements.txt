@@ -1,0 +1,9 @@
+pandas>=2.2.0
+numpy>=1.26.0
+matplotlib>=3.8.0
+python-dateutil>=2.9.0
+emoji>=2.8.0
+wordcloud>=1.9.3
+vaderSentiment>=3.3.2
+streamlit>=1.39.0
+pyarrow>=16.0.0
