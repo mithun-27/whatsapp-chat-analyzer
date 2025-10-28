@@ -36,29 +36,40 @@ hr {{ border: 0; border-top: 1px solid rgba(255,255,255,.08); margin: 8px 0 16px
 </style>
 """, unsafe_allow_html=True)
 
+# --- Full-width hero header (no clipping) ---
 st.markdown("""
 <style>
-/* Full-width hero header */
-.hero-box {
-  width: 100% !important;
-  padding: 28px 38px;
-  background: linear-gradient(135deg, rgba(124,58,237,.35), rgba(124,58,237,.08));
-  border: 1px solid rgba(124,58,237,.45);
-  border-radius: 0px 0px 16px 16px;
-  box-shadow: 0 18px 50px rgba(124,58,237,.25);
-  margin: -2rem 0 1.5rem 0;  /* stretch into full view container */
+/* keep a neat page gutter */
+.block-container{
+  padding-top:1rem !important;
+  padding-left:2rem !important;
+  padding-right:2rem !important;
 }
 
-.hero-title {
-  font-size: 36px;
+/* hero stretches edge-to-edge horizontally without pulling upward */
+.hero-box{
+  margin: 0 -2rem 1.25rem -2rem;        /* extend left/right only */
+  padding: 28px 38px;
+  background:
+    radial-gradient(1200px 200px at 10% 0%, rgba(124,58,237,.45), rgba(124,58,237,0)),
+    linear-gradient(135deg, #2a114e, #141223);
+  border: 1px solid rgba(124,58,237,.45);
+  border-radius: 12px;
+  box-shadow: 0 14px 42px rgba(124,58,237,.25);
+  overflow: visible;                     /* ensure text never clips */
+}
+
+.hero-title{
+  font-size: 40px;
+  line-height: 1.1;
   font-weight: 800;
   color: #EAEAF2 !important;
-  margin-bottom: 4px;
+  margin: 0 0 6px 0;
 }
-
-.hero-sub {
-  font-size: 17px;
-  opacity: .85;
+.hero-sub{
+  font-size: 16px;
+  opacity: .9;
+  margin: 0;
 }
 </style>
 
@@ -67,6 +78,7 @@ st.markdown("""
   <div class="hero-sub">Upload your chat (.txt). Media lines are automatically ignored for accuracy.</div>
 </div>
 """, unsafe_allow_html=True)
+
 
 
 # ---------- SIDEBAR ----------
