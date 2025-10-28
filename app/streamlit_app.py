@@ -36,32 +36,47 @@ hr {{ border: 0; border-top: 1px solid rgba(255,255,255,.08); margin: 8px 0 16px
 </style>
 """, unsafe_allow_html=True)
 
-# --- Full-width hero header (no clipping) ---
+
+# --- Full-bleed hero header (fully visible, not clipped) ---
 st.markdown("""
 <style>
-/* keep a neat page gutter */
+/* Give the main content a consistent side gutter */
 .block-container{
-  padding-top:1rem !important;
   padding-left:2rem !important;
   padding-right:2rem !important;
 }
 
-/* hero stretches edge-to-edge horizontally without pulling upward */
+/* Full-bleed container that spans the entire viewport width without using negative top margins */
+.full-bleed {
+  position: relative;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+  width: 100vw;
+}
+
+/* Add a little space from the very top so the banner is fully visible */
+.hero-wrap{
+  margin-top: 18px;          /* <-- move banner DOWN from the top */
+  margin-bottom: 18px;
+}
+
+/* The hero itself */
 .hero-box{
-  margin: 0 -2rem 1.25rem -2rem;        /* extend left/right only */
+  width: 100%;
   padding: 28px 38px;
   background:
     radial-gradient(1200px 200px at 10% 0%, rgba(124,58,237,.45), rgba(124,58,237,0)),
     linear-gradient(135deg, #2a114e, #141223);
   border: 1px solid rgba(124,58,237,.45);
-  border-radius: 12px;
+  border-radius: 12px;       /* full rectangle with rounded corners fully visible */
   box-shadow: 0 14px 42px rgba(124,58,237,.25);
-  overflow: visible;                     /* ensure text never clips */
 }
 
 .hero-title{
   font-size: 40px;
-  line-height: 1.1;
+  line-height: 1.15;
   font-weight: 800;
   color: #EAEAF2 !important;
   margin: 0 0 6px 0;
@@ -73,11 +88,15 @@ st.markdown("""
 }
 </style>
 
-<div class="hero-box">
-  <div class="hero-title">💜 WhatsApp Chat Analyzer</div>
-  <div class="hero-sub">Upload your chat (.txt). Media lines are automatically ignored for accuracy.</div>
+<div class="full-bleed hero-wrap">
+  <div class="hero-box">
+    <div class="hero-title">💜 WhatsApp Chat Analyzer</div>
+    <div class="hero-sub">Upload your chat (.txt). Media lines are automatically ignored for accuracy.</div>
+  </div>
 </div>
 """, unsafe_allow_html=True)
+
+
 
 
 
